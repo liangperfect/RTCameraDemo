@@ -12,11 +12,6 @@ public class ImageHelper {
             return false;
         }
 
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         int nFrameSize = inData.width * inData.height;
         yBuffer.clear();
         uBuffer.clear();
@@ -26,8 +21,6 @@ public class ImageHelper {
             yBuffer.put(inData.data, 0, nFrameSize).position(0);
             vBuffer.put(inData.data, nFrameSize, nFrameSize >> 2).position(0);
             uBuffer.put(inData.data, nFrameSize + (nFrameSize >> 2), nFrameSize >> 2).position(0);
-            // Log.d(TAG, "rotateYUV yv12 cost:" + (System.currentTimeMillis() -
-            // time));
         } else {
             byte[] yArray = new byte[yBuffer.limit()];
             byte[] uArray = new byte[uBuffer.limit()];
@@ -49,8 +42,6 @@ public class ImageHelper {
             yBuffer.put(yArray).position(0);
             uBuffer.put(uArray).position(0);
             vBuffer.put(vArray).position(0);
-            // Log.d(TAG, "rotateYUV yuv420sp cost:" +
-            // (System.currentTimeMillis() - time));
         }
         return true;
     }

@@ -3,10 +3,6 @@ package com.example.admin.myapplication.util;
 import android.opengl.GLES20;
 import android.util.Log;
 
-/**
- * Created by admin on 2017/06/20   .
- */
-
 public class ShaderHelper {
     private static final String TAG = "ShaderHelper";
 

@@ -8,10 +8,6 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-/**
- * Created by admin on 2017/06/29   .
- */
-
 public class MagicFilterDefault {
     private int mPositionHandle;
     private int mTexCoordHandle;

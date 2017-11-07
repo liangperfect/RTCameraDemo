@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.annotation.RequiresApi;
@@ -19,41 +18,40 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import com.example.admin.myapplication.R;
 import com.example.admin.myapplication.util.CameraSettings;
 import com.example.admin.myapplication.util.ImageHelper;
+import com.example.admin.myapplication.util.MagicFilterView;
 import com.example.admin.myapplication.util.PermissionsActivity;
 
-import java.lang.reflect.Method;
-
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-
-public class CameraActivity extends AppCompatActivity implements GLSurfaceView.Renderer, TextureView.SurfaceTextureListener {
+public class CameraActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
 
     private final String TAG = "CameraActivity";
     private static final int CAMERA_HAL_API_VERSION_1_0 = 0x100;
     private boolean mHasCriticalPermissions;
     private int camId = 0;//camera IDs
     private Camera mCamera;
-    private GLSurfaceView mGlSurfaceView;
     private Button btnSwitch;
+    private RelativeLayout mRelativeLayout;
     private byte[][] mMemory;
     private int count = 0;
 
-    //camera parameters
-    private int mFullPreviewWidth;
-    private int mFullPreviewHeight;
     private int mFormat = ImageFormat.NV21;
     private int mSubPreviewWidth = 640;
     private int mSubPreviewHeight = 480;
     private String mCurrent = "none";
 
-    private int mDisplayWidth = 0;
-    private int mDisplayHeight = 0;
-    private float mDisplayRatio = 1.00f;
+    //buffer data
+    private ByteBuffer yBuffer = null;
+    private ByteBuffer uBuffer = null;
+    private ByteBuffer vBuffer = null;
+    private MagicFilterView mMagicFilterView;
 
     private TextureView mTexture;
 
@@ -80,83 +78,12 @@ public class CameraActivity extends AppCompatActivity implements GLSurfaceView.R
         setContentView(R.layout.activity_camera);
         getSupportActionBar().hide();
         initView();
-        //openMainCamera();
-        //startPreviewMainCamera();
-    }
-
-    private void openMainCamera() {
-
-        mCamera = Camera.open(camId);
-        /*
-        try {
-            Method openMethod = Class.forName("android.hardware.Camera").getMethod(
-                    "openLegacy", int.class, int.class);
-            mCamera = (Camera) openMethod.invoke(null, camId, CAMERA_HAL_API_VERSION_1_0);
-        } catch (Exception e) {
-            mCamera = Camera.open(camId);
-        }
-        */
-        if (mCamera == null)
-            return;
-    }
-
-    private void startPreviewMainCamera() {
-
-        Camera.Parameters p = mCamera.getParameters();
-        Camera.Size preview = p.getPreviewSize();
-        mFormat = p.getPreviewFormat();
-        mFullPreviewWidth = preview.width;
-        mFullPreviewHeight = preview.height;
-        mDisplayRatio = mFullPreviewWidth / (float) mFullPreviewHeight;
-        // set new preview size, MUST stop preview, otherwise preview not
-        // changed.
-        // mCamera.stopPreview();
-        Log.d(TAG, mFullPreviewWidth + " applyCameraPreviewWithBuffer, " + mFullPreviewHeight);
-        if (ImageHelper.equals(mDisplayRatio, 4.0 / 3)) {
-            p.setPreviewSize(640, 480);
-        } else {
-            p.setPreviewSize(640, 360);
-        }
-        p.setColorEffect("none");
-        p.setPreviewFormat(ImageFormat.YV12);
-        // p.setPreviewFormat(ImageFormat.NV21);
-        mCamera.setParameters(p);
-
-        preview = p.getPreviewSize();
-        mSubPreviewWidth = preview.width;
-        mSubPreviewHeight = preview.height;
-        Log.d(TAG, "previewSize->width: " + mSubPreviewWidth + "  height:" + mSubPreviewHeight);
-        final int format = p.getPreviewFormat();
-        int length = preview.width * preview.height * ImageFormat.getBitsPerPixel(format) / 8;
-        final Camera.Size size = preview;
-        mMemory = new byte[2][length];
-        mCamera.addCallbackBuffer(mMemory[0]);
-        mCamera.setPreviewCallbackWithBuffer(new Camera.PreviewCallback() {
-            @Override
-            public void onPreviewFrame(byte[] bytes, Camera camera) {
-                count++;
-                if (1 == count) {
-                    Log.d(TAG, "liang.chen->count");
-                }
-                Log.d(TAG, "liang.chen->setPreviewCallbackWithBuffer");
-            }
-        });
-
-        mCamera.setPreviewCallback(new Camera.PreviewCallback() {
-            @Override
-            public void onPreviewFrame(byte[] bytes, Camera camera) {
-                Log.d(TAG, "asdasda");
-            }
-        });
-        Log.d(TAG, "startPreview");
-        mCamera.startPreview();
     }
 
     private void initView() {
         mTexture = (TextureView) findViewById(R.id.texture);
         mTexture.setSurfaceTextureListener(this);
-        mGlSurfaceView = (GLSurfaceView) findViewById(R.id.glsurfaceview);
-        mGlSurfaceView.setRenderer(this);
+        mRelativeLayout = (RelativeLayout) findViewById(R.id.glsurface_content);
         btnSwitch = (Button) findViewById(R.id.btn_switch);
         btnSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -164,7 +91,6 @@ public class CameraActivity extends AppCompatActivity implements GLSurfaceView.R
                 Toast.makeText(CameraActivity.this, "Camera Activity btn ce shi", Toast.LENGTH_SHORT).show();
             }
         });
-
 
     }
 
@@ -205,24 +131,6 @@ public class CameraActivity extends AppCompatActivity implements GLSurfaceView.R
         return requestPermission;
     }
 
-    //glsurfaceview render interface
-    @Override
-    public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-
-    }
-
-    @Override
-    public void onSurfaceChanged(GL10 gl10, int i, int i1) {
-
-    }
-
-    @Override
-    public void onDrawFrame(GL10 gl10) {
-
-    }
-
-
-    //textureview callback interface
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
         if (mCamera == null) {
@@ -237,33 +145,40 @@ public class CameraActivity extends AppCompatActivity implements GLSurfaceView.R
                 //parameters.setPictureFormat(ImageFormat.NV21);
                 mCamera.setParameters(parameters);
                 mCamera.setPreviewTexture(surfaceTexture);
-                //mCamera.setPreviewCallback(this);
                 mCamera.setDisplayOrientation(90);
-
-                /*a============================*/
+                parameters.setPreviewFormat(ImageFormat.YV12);
                 Camera.Parameters p = mCamera.getParameters();
                 Camera.Size preview = p.getPreviewSize();
                 preview = p.getPreviewSize();
                 mSubPreviewWidth = preview.width;
                 mSubPreviewHeight = preview.height;
+                initDataBuffer(mSubPreviewHeight * mSubPreviewWidth);
+                mMagicFilterView = new MagicFilterView(CameraActivity.this, mSubPreviewWidth, mSubPreviewHeight);
+                mRelativeLayout.addView(mMagicFilterView);
                 int length = preview.width * preview.height * ImageFormat.getBitsPerPixel(ImageFormat.YV12) / 8;
                 final Camera.Size size = preview;
                 mMemory = new byte[2][length];
                 mCamera.addCallbackBuffer(mMemory[0]);
                 mCamera.setPreviewCallbackWithBuffer(new Camera.PreviewCallback() {
                     @Override
-                    public void onPreviewFrame(byte[] bytes, Camera camera) {
-
-                        Log.d(TAG, "liang.chen->setPreviewCallbackWithBuffer");
-                        mCamera.addCallbackBuffer(mMemory[0]);
+                    public void onPreviewFrame(byte[] data, Camera camera) {
+                        updateFrameData(data, yBuffer, uBuffer, vBuffer, ImageFormat.YV12, mSubPreviewWidth, mSubPreviewHeight);
+                        if (mCamera != null) {
+                            mCamera.addCallbackBuffer(mMemory[0]);
+                        }
                     }
                 });
-                /*============================*/
                 mCamera.startPreview();
             } catch (Exception e) {
                 return;
             }
         }
+    }
+
+    private synchronized void updateFrameData(final byte[] data, ByteBuffer buffer, ByteBuffer buffer1, ByteBuffer buffer2, int yv12, int width, int height) {
+        ImageHelper.ImageData inData = new ImageHelper.ImageData(data, ImageFormat.YV12, mSubPreviewWidth, mSubPreviewHeight);
+        ImageHelper.fillYUVBuffer(inData, yBuffer, uBuffer, vBuffer);
+        mMagicFilterView.onFrame(data, yBuffer, uBuffer, vBuffer, ImageFormat.YV12, mSubPreviewWidth, mSubPreviewHeight);
     }
 
     @Override
@@ -273,6 +188,11 @@ public class CameraActivity extends AppCompatActivity implements GLSurfaceView.R
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
+        if (mCamera != null) {
+            mCamera.stopPreview();
+            mCamera.release();
+            mCamera = null;
+        }
         return false;
     }
 
@@ -280,4 +200,16 @@ public class CameraActivity extends AppCompatActivity implements GLSurfaceView.R
     public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
 
     }
+
+    //YUV buffer
+    private void initDataBuffer(int yuvFrameSize) {
+        // recycled by GC
+        yBuffer = ByteBuffer.allocate(yuvFrameSize).order(ByteOrder.nativeOrder());
+        yBuffer.position(0);
+        uBuffer = ByteBuffer.allocate(yuvFrameSize >> 2).order(ByteOrder.nativeOrder());
+        uBuffer.position(0);
+        vBuffer = ByteBuffer.allocate(yuvFrameSize >> 2).order(ByteOrder.nativeOrder());
+        vBuffer.position(0);
+    }
 }
+

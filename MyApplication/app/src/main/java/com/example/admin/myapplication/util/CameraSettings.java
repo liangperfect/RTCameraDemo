@@ -6,6 +6,6 @@ package com.example.admin.myapplication.util;
 
 public class CameraSettings {
 
-    public static final String KEY_REQUEST_PERMISSION  = "request_permission";
+    public static final String KEY_REQUEST_PERMISSION = "request_permission";
 
 }
