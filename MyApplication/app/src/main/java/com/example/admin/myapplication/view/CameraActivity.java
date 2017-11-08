@@ -109,7 +109,6 @@ public class CameraActivity extends AppCompatActivity {
             }
         });
     }
-
     /**
      * Checks if any of the needed Android runtime permissions are missing.
      * If they are, then launch the permissions activity under one of the following conditions:

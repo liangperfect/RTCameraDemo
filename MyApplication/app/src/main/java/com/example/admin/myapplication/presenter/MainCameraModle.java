@@ -122,7 +122,9 @@ public class MainCameraModle implements TextureView.SurfaceTextureListener {
         public void handPreviewFrame(final byte[] data, int yv12, int mSubPreviewWidth, int mSubPreviewHeight);
 
         public void initYUVBuffer(int width, int height);
-
     }
+
+
+
 
 }
