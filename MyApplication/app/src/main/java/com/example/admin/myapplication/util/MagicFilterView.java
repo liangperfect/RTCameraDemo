@@ -37,6 +37,7 @@ public class MagicFilterView extends GLSurfaceView implements GLSurfaceView.Rend
 
     private boolean mSuspend = false;
     private int mFilterIndex = 4;
+
     public MagicFilterView(Context context) {
         super(context);
     }
@@ -61,7 +62,7 @@ public class MagicFilterView extends GLSurfaceView implements GLSurfaceView.Rend
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-        GLES20.glEnable(GLES20.GL_TEXTURE_2D);
+        GLES20.glEnable(GLES20.GL_TEXTURE_2D);  // ???
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE2);
@@ -121,7 +122,7 @@ public class MagicFilterView extends GLSurfaceView implements GLSurfaceView.Rend
                 if (mFilterDraw != null)
                     mFilterDraw.onDestroy();
                 mFilterDraw = null;
-                mFilterDraw = new MagicFilterPrague();
+                mFilterDraw = new MagicFilterNone();
                 if (mFilterDraw != null)
                     mFilterDraw.onInit();
                 onFilterChanged();

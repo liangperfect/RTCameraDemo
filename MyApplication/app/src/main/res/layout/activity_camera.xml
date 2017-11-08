@@ -8,8 +8,8 @@
 
     <TextureView
         android:id="@+id/texture"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"/>
 
@@ -17,9 +17,18 @@
         android:id="@+id/glsurface_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
         />
+
+    <TextureView
+        android:id="@+id/sub_texture"
+        android:layout_width="150dp"
+        android:layout_height="200dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        />
+
     <Button
         android:id="@+id/btn_switch"
         android:layout_width="wrap_content"
