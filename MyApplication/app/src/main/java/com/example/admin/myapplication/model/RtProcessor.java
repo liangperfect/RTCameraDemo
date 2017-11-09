@@ -13,7 +13,7 @@ public class RtProcessor {
     public final static int COLOR_FORMAT_YUV_YV12 = 0x18;
 
     static {
-        //System.loadLibrary("");
+        System.loadLibrary("rt_jni");
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ public class RtProcessor {
     //
     //@return              :0 for success other failure.
     /////////////////////////////////////////////////////////////////////////////////////////
-    public static  native int dump();
+    public static native int dump();
 
     /////////////////////////////////////////////////////////////////////////////////////////
     //Destroy realtime refocus resource
@@ -68,7 +68,6 @@ public class RtProcessor {
     //@return               :Return version info
     /////////////////////////////////////////////////////////////////////////////////////////
     public static native int getVersion();
-
 
 
 }

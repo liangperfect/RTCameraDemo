@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import com.example.admin.myapplication.R;
+import com.example.admin.myapplication.model.RtProcessor;
 import com.example.admin.myapplication.presenter.MainCameraModle;
 import com.example.admin.myapplication.util.CameraSettings;
 import com.example.admin.myapplication.util.ImageHelper;
@@ -105,10 +106,15 @@ public class CameraActivity extends AppCompatActivity {
         btnSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(CameraActivity.this, "Camera Activity btn ce shi", Toast.LENGTH_SHORT).show();
+                //获取jni的值
+                int jniResult1 = RtProcessor.getVersion();
+                int jniResult2 = RtProcessor.aflocked();
+                int jniResult3 = RtProcessor.dump();
+                Toast.makeText(CameraActivity.this, "jniResult1:" + jniResult1+"   jniResult2"+jniResult2+"   jniResult3"+jniResult3, Toast.LENGTH_SHORT).show();
             }
         });
     }
+
     /**
      * Checks if any of the needed Android runtime permissions are missing.
      * If they are, then launch the permissions activity under one of the following conditions:
