@@ -19,5 +19,8 @@ LOCAL_MODULE := rt_jni
 LOCAL_SRC_FILES := com_example_admin_myapplication_model_RtProcessor.cpp
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include/
 LOCAL_LDLIBS :=-llog
+LOCAL_MULTILIB := 32
+LOCAL_SHARED_LIBRARIES := SimpleJni
 #APP_PLATFORM :=android-19
 include $(BUILD_SHARED_LIBRARY)
+include $(LOCAL_PATH)/libs/armeabi-v7a/Android.mk

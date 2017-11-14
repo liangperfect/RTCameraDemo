@@ -35,7 +35,7 @@ public class MainCameraModle implements TextureView.SurfaceTextureListener {
                     parameters.setFocusMode(android.hardware.Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
                 }
                 //preview size: 1280x960;1280x720;640x480;768*432;480*360;640*360
-                parameters.setPreviewSize(640, 480);
+                parameters.setPreviewSize(1280, 960);
                 //parameters.setPictureFormat(ImageFormat.NV21);
                 mMainCamera.setParameters(parameters);
                 Log.d("liang.chen", "liang.chen setPreviewTexture");
@@ -60,12 +60,11 @@ public class MainCameraModle implements TextureView.SurfaceTextureListener {
                         // updateFrameData(data, yBuffer, uBuffer, vBuffer, ImageFormat.NV21, mSubPreviewWidth, mSubPreviewHeight);
                         synchronized (this) {
                             if (mHandlePreviewFrame != null) {
-                                mHandlePreviewFrame.handPreviewFrame(data, ImageFormat.NV21, mSubPreviewWidth, mSubPreviewHeight);
+                                //mHandlePreviewFrame.handPreviewFrame(data, ImageFormat.NV21, mSubPreviewWidth, mSubPreviewHeight);
 
                             }
                             if (mMainCamera != null) {
                                 mMainCamera.addCallbackBuffer(mMemory[0]);
-                                Log.d("liang.chen", "liang.chen->" + camId);
                             }
                         }
 

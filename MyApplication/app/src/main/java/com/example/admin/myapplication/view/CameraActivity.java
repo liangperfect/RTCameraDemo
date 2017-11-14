@@ -110,7 +110,7 @@ public class CameraActivity extends AppCompatActivity {
                 int jniResult1 = RtProcessor.getVersion();
                 int jniResult2 = RtProcessor.aflocked();
                 int jniResult3 = RtProcessor.dump();
-                Toast.makeText(CameraActivity.this, "jniResult1:" + jniResult1+"   jniResult2"+jniResult2+"   jniResult3"+jniResult3, Toast.LENGTH_SHORT).show();
+                Toast.makeText(CameraActivity.this, "jniResult1:" + jniResult1+"   jniResult2:"+jniResult2+"   jniResult3:"+jniResult3, Toast.LENGTH_SHORT).show();
             }
         });
     }

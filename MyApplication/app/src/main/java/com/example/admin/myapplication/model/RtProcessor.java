@@ -14,6 +14,7 @@ public class RtProcessor {
 
     static {
         System.loadLibrary("rt_jni");
+        System.loadLibrary("dcs_realtime_refocus");
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
