@@ -14,7 +14,7 @@ public class RtProcessor {
 
     static {
         System.loadLibrary("rt_jni");
-        System.loadLibrary("dcs_realtime_refocus");
+        //System.loadLibrary("dcs_realtime_refocus");
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -46,8 +46,8 @@ public class RtProcessor {
     //@param fNum          :user set camera fNumber, fNum should be greater than 0.0f and less than or equal to 17.0f.
     //@return              :0 for success other failure.
     /////////////////////////////////////////////////////////////////////////////////////////
-    public static native int process(byte[] mianBuffer, int mainW, int mainH, int mainFormat, int mainRoation, int mainSW, int mainSH,
-                                     byte[] subBuffer, int subW, int subH, int subFormat, int subRotation, int subSW, int subSH);
+    public static native int process(byte[] mainBuffer, int mainW, int mainH, int mainFormat, int mainRoation, int mainSW, int mainSH,
+                                     byte[] subBuffer, int subW, int subH, int subFormat, int subRotation, int subSW, int subSH,byte[] outBuffer, int outW, int outH, int outFormat, int outRotation, int outSW, int outSH);
 
     /////////////////////////////////////////////////////////////////////////////////////////
     //Dump realtime refocus image frames.

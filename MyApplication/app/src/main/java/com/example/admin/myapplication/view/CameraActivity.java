@@ -83,6 +83,7 @@ public class CameraActivity extends AppCompatActivity {
         mRelativeLayout = (RelativeLayout) findViewById(R.id.glsurface_content);
         btnSwitch = (Button) findViewById(R.id.btn_switch);
         mMainCameraModle = new MainCameraModle();
+        mMainCameraModle.setCurrentCameraId(CameraSettings.MAIN_CAMERA_ID);
         mMainCameraModle.setIHandlePreviewFrame(new MainCameraModle.IHandlePreviewFrame() {
 
             @Override
@@ -101,7 +102,8 @@ public class CameraActivity extends AppCompatActivity {
         });
         mTexture.setSurfaceTextureListener(mMainCameraModle);
         mSubCameraModle = new MainCameraModle();
-        mSubCameraModle.setCameraId(2);
+        mSubCameraModle.setCurrentCameraId(CameraSettings.SUB_CAMERA_ID);
+        mSubCameraModle.setCameraId(CameraSettings.SUB_CAMERA_ID);
         mSubTexture.setSurfaceTextureListener(mSubCameraModle);
         btnSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,7 +112,7 @@ public class CameraActivity extends AppCompatActivity {
                 int jniResult1 = RtProcessor.getVersion();
                 int jniResult2 = RtProcessor.aflocked();
                 int jniResult3 = RtProcessor.dump();
-                Toast.makeText(CameraActivity.this, "jniResult1:" + jniResult1+"   jniResult2:"+jniResult2+"   jniResult3:"+jniResult3, Toast.LENGTH_SHORT).show();
+                Toast.makeText(CameraActivity.this, "jniResult1:" + jniResult1 + "   jniResult2:" + jniResult2 + "   jniResult3:" + jniResult3, Toast.LENGTH_SHORT).show();
             }
         });
     }
