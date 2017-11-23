@@ -5,9 +5,11 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.util.Log;
 import android.view.TextureView;
+import android.widget.TableLayout;
 
 import com.example.admin.myapplication.model.RtItemModel;
 import com.example.admin.myapplication.util.CameraSettings;
+import com.example.admin.myapplication.util.CameraUtil;
 import com.example.admin.myapplication.util.RtRefocusManager;
 
 import java.lang.reflect.Method;
@@ -15,12 +17,12 @@ import java.nio.ByteBuffer;
 
 public class MainCameraModle implements TextureView.SurfaceTextureListener {
 
-    private final String TAG = "MainCameraModle";
+    private final String TAG = "MainCameraModel";
     private Camera mMainCamera;
     private int camId = 0;
     private int mFormat = ImageFormat.NV21;
-    private int mMainPreviewWidth = 640;
-    private int mMainPreviewHeight = 480;
+    private int mMainPreviewWidth = 1440;
+    private int mMainPreviewHeight = 1080;
     private String mCurrent = "none";
     private byte[][] mMemory;
     private IHandlePreviewFrame mHandlePreviewFrame;
@@ -30,6 +32,9 @@ public class MainCameraModle implements TextureView.SurfaceTextureListener {
     private RtItemModel mRtSubItemModel;
     private RtItemModel mOutItemModel;
     private RtRefocusManager mRtRefocusManager;
+
+    private int mFrameSize = mMainPreviewWidth * mMainPreviewHeight + mMainPreviewWidth * mMainPreviewHeight / 2;
+    private int mFrameSize1 = mMainPreviewWidth * mMainPreviewHeight;
     private int count;
 
     @Override
@@ -50,71 +55,53 @@ public class MainCameraModle implements TextureView.SurfaceTextureListener {
                 mRtMainItemModel = new RtItemModel();
                 mRtSubItemModel = new RtItemModel();
                 mOutItemModel = new RtItemModel();
-                //preview size: 1280x960;1280x720;640x480;768*432;480*360;640*360
                 parameters.setPreviewSize(mMainPreviewWidth, mMainPreviewHeight);
-                //parameters.setPictureFormat(ImageFormat.NV21);
                 mMainCamera.setParameters(parameters);
                 mMainCamera.setPreviewTexture(surfaceTexture);
                 mMainCamera.setDisplayOrientation(90);
                 parameters.setPreviewFormat(ImageFormat.NV21);
-                // android.hardware.Camera.Parameters p = mMainCamera.getParameters();
-                // android.hardware.Camera.Size preview = p.getPreviewSize();
-                //  preview = p.getPreviewSize();
-                // mMainPreviewWidth = preview.width;
-                //  mMainPreviewHeight = preview.height;
                 if (mHandlePreviewFrame != null) {
                     mHandlePreviewFrame.initYUVBuffer(mMainPreviewWidth, mMainPreviewHeight);
                 }
                 int length = mMainPreviewWidth * mMainPreviewHeight * ImageFormat.getBitsPerPixel(ImageFormat.NV21) / 8;
-                //final android.hardware.Camera.Size size = preview;
-                //RtRefocusManager;
-                mRtRefocusManager = new RtRefocusManager();
-                mRtRefocusManager.init(640, 480, 640, 480);
-                //添加一个点击对焦回调，然后保存对焦点，换算成preview surface的对焦掉
-                mRtRefocusManager.aflocked();
-
                 mMemory = new byte[2][length];
                 mMainCamera.addCallbackBuffer(mMemory[0]);
                 mMainCamera.setPreviewCallbackWithBuffer(new android.hardware.Camera.PreviewCallback() {
                     @Override
                     public void onPreviewFrame(byte[] data, android.hardware.Camera camera) {
-                        // updateFrameData(data, yBuffer, uBuffer, vBuffer, ImageFormat.NV21, mSubPreviewWidth, mSubPreviewHeight);
                         synchronized (this) {
                             switch (currentCameraId) {
                                 case CameraSettings.MAIN_CAMERA_ID:
-                                    count++;
-                                    if (count == 30) {
-                                        /*
-                                        // mRtMainItemModel.setMainBuffer(data);
-                                        //  mRtMainItemModel.setMainW(640);
-                                        // mRtMainItemModel.setMainH(480);
-                                        // mRtMainItemModel.setMainFormat(ImageFormat.NV21);
-                                        // mRtMainItemModel.setMainRotation(0);
-                                        // mRtMainItemModel.setMainSW(-1);
-                                        //  mRtMainItemModel.setMainSH(-1);
-                                        // Log.d(TAG, "onPreviewFrame->" + Thread.currentThread().getName());
-                                        //mRtRefocusManager.process(mRtMainItemModel, mRtSubItemModel, mOutItemModel);
-                                        */
-                                        mRtRefocusManager.postMainModelItem(mRtMainItemModel);
-                                    }
+                                    ByteBuffer mainBuffer = ByteBuffer.allocate(mFrameSize);
+                                    mainBuffer.put(data, 0, mFrameSize);
+                                    mRtMainItemModel.setMainBuffer(CameraUtil.nv21ToYV12(mainBuffer, mFrameSize1));
+                                    mRtMainItemModel.setMainW(mMainPreviewWidth);
+                                    mRtMainItemModel.setMainH(mMainPreviewHeight);
+                                    mRtMainItemModel.setMainFormat(ImageFormat.YV12);
+                                    mRtMainItemModel.setMainRotation(0);
+                                    mRtMainItemModel.setMainSW(-1);
+                                    mRtMainItemModel.setMainSH(-1);
+                                    mRtRefocusManager.postMainModelItem(mRtMainItemModel);
                                     if (mHandlePreviewFrame != null) {
-                                        mHandlePreviewFrame.handPreviewFrame(data, ImageFormat.NV21, mMainPreviewWidth, mMainPreviewHeight);
+                                        mHandlePreviewFrame.handPreviewFrame(mRtRefocusManager.getOutRtModel().getMainBuffer(), ImageFormat.NV21, mMainPreviewWidth, mMainPreviewHeight);
                                     }
                                     break;
-
                                 case CameraSettings.SUB_CAMERA_ID:
+                                    ByteBuffer subBuffer = ByteBuffer.allocate(mFrameSize);
+                                    subBuffer.put(data, 0, mFrameSize);
+                                    mRtSubItemModel.setSubBuffer(CameraUtil.nv21ToYV12(subBuffer, mFrameSize1));
+                                    mRtSubItemModel.setSubW(mMainPreviewWidth);
+                                    mRtSubItemModel.setSubH(mMainPreviewHeight);
+                                    mRtSubItemModel.setSubFormat(ImageFormat.YV12);
+                                    mRtSubItemModel.setSubRotation(0);
+                                    mRtSubItemModel.setSubSW(-1);
+                                    mRtSubItemModel.setSubSH(-1);
                                     mRtRefocusManager.postSubModelItem(mRtSubItemModel);
-
                                     break;
-
                                 default:
                                     //nothing to do
                                     break;
-
-
                             }
-
-
                             if (mMainCamera != null) {
                                 mMainCamera.addCallbackBuffer(mMemory[0]);
                             }
@@ -177,6 +164,10 @@ public class MainCameraModle implements TextureView.SurfaceTextureListener {
 
     public void setCurrentCameraId(int cameraId) {
         this.currentCameraId = cameraId;
+    }
+
+    public void setRtRefocusManager(RtRefocusManager manager) {
+        this.mRtRefocusManager = manager;
     }
 
 }

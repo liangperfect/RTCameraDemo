@@ -28,6 +28,10 @@ public class RtItemModel {
     }
 
     public void setMainBuffer(byte[] mainBuffer) {
+        //NV21转YV12
+
+
+
         this.mainBuffer = mainBuffer;
     }
 

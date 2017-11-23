@@ -35,6 +35,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:text="转换开关"/>
+        android:layout_centerVertical="true"
+        android:text="转换开关"
+        android:visibility="gone"/>
 
 </RelativeLayout>

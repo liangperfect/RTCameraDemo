@@ -31,6 +31,7 @@ import com.example.admin.myapplication.util.CameraSettings;
 import com.example.admin.myapplication.util.ImageHelper;
 import com.example.admin.myapplication.util.MagicFilterView;
 import com.example.admin.myapplication.util.PermissionsActivity;
+import com.example.admin.myapplication.util.RtRefocusManager;
 
 public class CameraActivity extends AppCompatActivity {
 
@@ -38,8 +39,8 @@ public class CameraActivity extends AppCompatActivity {
     private boolean mHasCriticalPermissions;
     private Button btnSwitch;
     private RelativeLayout mRelativeLayout;
-    private int mSubPreviewWidth = 640;
-    private int mSubPreviewHeight = 480;
+    private int mSubPreviewWidth = 1440;
+    private int mSubPreviewHeight = 1080;
 
     //buffer data
     private ByteBuffer yBuffer = null;
@@ -51,6 +52,7 @@ public class CameraActivity extends AppCompatActivity {
     private TextureView mSubTexture;
     private MainCameraModle mMainCameraModle;
     private MainCameraModle mSubCameraModle;
+    private RtRefocusManager mRtRefocusManager;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -82,13 +84,18 @@ public class CameraActivity extends AppCompatActivity {
         mSubTexture = (TextureView) findViewById(R.id.sub_texture);
         mRelativeLayout = (RelativeLayout) findViewById(R.id.glsurface_content);
         btnSwitch = (Button) findViewById(R.id.btn_switch);
+        mRtRefocusManager = new RtRefocusManager();
+        mRtRefocusManager.init(1440, 1080, 1440, 1080);
+        //添加一个点击对焦回调，然后保存对焦点，换算成preview surface的对焦掉
+        mRtRefocusManager.aflocked();
         mMainCameraModle = new MainCameraModle();
+        mMainCameraModle.setRtRefocusManager(mRtRefocusManager);
         mMainCameraModle.setCurrentCameraId(CameraSettings.MAIN_CAMERA_ID);
         mMainCameraModle.setIHandlePreviewFrame(new MainCameraModle.IHandlePreviewFrame() {
 
             @Override
             public void handPreviewFrame(byte[] data, int yv12, int mSubPreviewWidth, int mSubPreviewHeight) {
-                ImageHelper.ImageData inData = new ImageHelper.ImageData(data, ImageFormat.NV21, mSubPreviewWidth, mSubPreviewHeight);
+                ImageHelper.ImageData inData = new ImageHelper.ImageData(data, ImageFormat.YV12, mSubPreviewWidth, mSubPreviewHeight);
                 ImageHelper.fillYUVBuffer(inData, yBuffer, uBuffer, vBuffer);
                 mMagicFilterView.onFrame(data, yBuffer, uBuffer, vBuffer, yv12, mSubPreviewWidth, mSubPreviewHeight);
             }
@@ -102,6 +109,7 @@ public class CameraActivity extends AppCompatActivity {
         });
         mTexture.setSurfaceTextureListener(mMainCameraModle);
         mSubCameraModle = new MainCameraModle();
+        mSubCameraModle.setRtRefocusManager(mRtRefocusManager);
         mSubCameraModle.setCurrentCameraId(CameraSettings.SUB_CAMERA_ID);
         mSubCameraModle.setCameraId(CameraSettings.SUB_CAMERA_ID);
         mSubTexture.setSurfaceTextureListener(mSubCameraModle);
